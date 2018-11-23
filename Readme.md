@@ -4,7 +4,7 @@ A C++ library for Windows for efficient read/write locks with template generaliz
 Based on my tlock article (https://www.codeproject.com/Articles/1186797/tlock-Any-Cplusplus-object-read-write-thread-safe)
 Based on my RWMutex (https://www.codeproject.com/Articles/1053865/RWMutex-A-Shared-Exclusive-Recursive-Mutex)
 
-Quick guide:
+Quick example:
 
 ```C++
 tlock<vector<int>> s;
