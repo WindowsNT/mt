@@ -51,6 +51,26 @@ The readlock() method is called when you want many operations in a locked read-o
 
 The writelock() method is called when you want many operations in a locked read-write object, so it calls your function, passing a reference to the locked object.
 
+You can also use tlock upgrade function
+
+```C++
+s.rwlock([](vector<int>& ss, std::function<void(bool)> udf)
+{
+	// read lock
+	auto s1 = ss.size();
+	
+	// locks write
+	udf(true);
+	ss.push_back(200);
+	
+	// downgrades to read
+	udf(false);
+	auto s2 = ss.size();
+	
+	// release by destructor
+}
+);
+```
 
 You can also use my RWMUTEX functions
 
