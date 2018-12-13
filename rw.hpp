@@ -233,12 +233,45 @@ private:
 		HANDLE lm = 0;
 		int me;
 	public:
-		proxy(T * const _p, RWMUTEX* _m, int _me) : p(_p), m(_m), me(_me) { if (me == 2) m->LockWrite(); else lm = m->LockRead(); }
-		~proxy() { if (me == 2) m->ReleaseWrite(); else { m->ReleaseRead(lm); lm = 0; } }
+		proxy(T * const _p, RWMUTEX* _m, int _me) : p(_p), m(_m), me(_me) 
+		{ 
+			if (me == 2) 
+				m->LockWrite(); 
+			else lm = m->LockRead(); 
+		}
+		~proxy() 
+		{
+			if (me == 2) 
+				m->ReleaseWrite(); 
+			else 
+			{ 
+				m->ReleaseRead(lm); 
+				lm = 0; 
+			} 
+		}
 		T* operator -> () { return p; }
 		const T* operator -> () const { return p; }
 		T* getp() { return p; }
 		const T* getpc() const { return p; }
+		void upgrade() 
+		{
+			if (me == 1)
+			{
+				lm = 0;
+				m->Upgrade();
+				me = 2;
+			}
+		}
+
+		void downgrade()
+		{
+			if (me == 2)
+			{
+				lm = m->Downgrade();
+				me = 1;
+			}
+		}
+
 	};
 
 public:
@@ -262,6 +295,19 @@ public:
 	{
 		proxy mx(&t, &m, 2);
 		f(*mx.getp());
+	}
+
+	void rwlock(std::function<void(T&,std::function<void(bool)>)> f)
+	{
+		proxy mx(&t, &m, 1);
+		auto updownfunc = [&](bool ud)
+		{
+			if (ud)
+				mx.upgrade();
+			else
+				mx.downgrade();
+		};
+		f(*mx.getp(), updownfunc);
 	}
 
 	proxy operator -> () { return w(); }
