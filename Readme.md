@@ -42,6 +42,7 @@ std::thread t5([&]() { s->push_back(4); });
 t1.join();t2.join(); t3.join(); t4.join(); t5.join();
 ```
 
+
 The r() method is called when you want read-only access to the object. This is the default when operator -> is called on a const object. Many threads can call r() simultaneously.
 
 The w() method is called when you want write access to the object. This is the default for operator -> if the object is not constant. w() blocks until all threads that are within r() return, and then does not allow any other thread to complete r() or w() until it returns.
@@ -50,3 +51,35 @@ The readlock() method is called when you want many operations in a locked read-o
 
 The writelock() method is called when you want many operations in a locked read-write object, so it calls your function, passing a reference to the locked object.
 
+
+You can also use my RWMUTEX functions
+
+```C++
+RWMUTEX m;
+void foo1()
+{
+  RWMUTEXLOCKREAD lock(&m);
+  // while in here, m is read-locked
+}
+
+void foo2()
+{
+  RWMUTEXLOCKWRITE lock(&m);
+  // while in here, m is write-locked
+}
+
+void foo3()
+{
+  RWMUTEXLOCKREADWRITE lock(&m);
+  // while in here, m is read-locked
+  
+  ...
+  m.Upgrade(); // now m is write-locked
+  ...
+  m.Downgrade(); // m back read-locked
+  
+  // end of function, m released
+}
+
+
+```
