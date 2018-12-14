@@ -286,6 +286,17 @@ public:
 		return proxy(&t, &m, 2);
 	}
 
+	T& direct()
+	{
+		return t;
+	}
+
+	const T& direct() const
+	{
+		return t;
+	}
+
+
 	void readlock(std::function<void(const T&)> f) const
 	{
 		proxy mx(&t, &m, 1);
@@ -297,17 +308,16 @@ public:
 		f(*mx.getp());
 	}
 
-	void rwlock(std::function<void(T&,std::function<void(bool)>)> f)
+	void rwlock(std::function<void(const T&,std::function<void(std::function<void(T&)>)>)> f)
 	{
 		proxy mx(&t, &m, 1);
-		auto updownfunc = [&](bool ud)
+		auto upfunc = [&](std::function<void(T&)> f2)
 		{
-			if (ud)
-				mx.upgrade();
-			else
-				mx.downgrade();
+			mx.upgrade();
+			f2(*mx.getp());
+			mx.downgrade();
 		};
-		f(*mx.getp(), updownfunc);
+		f(*mx.getp(), upfunc);
 	}
 
 	proxy operator -> () { return w(); }
