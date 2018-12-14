@@ -54,22 +54,15 @@ The writelock() method is called when you want many operations in a locked read-
 You can also use tlock upgrade function
 
 ```C++
-s.rwlock([](vector<int>& ss, std::function<void(bool)> udf)
+s.rwlock([&](const vector<int>& vv, std::function<void(std::function<void(vector<int>&)>)> upgrfunc) 
 {
-	// read lock
-	auto s1 = ss.size();
-	
-	// locks write
-	udf(true);
-	ss.push_back(200);
-	
-	// downgrades to read
-	udf(false);
-	auto s2 = ss.size();
-	
-	// release by destructor
-}
-);
+	// vv read access
+	upgrfunc([&](vector<int>& nn) 
+	{
+		// nn write access
+		// function end downgrades
+	});
+});
 ```
 
 You can also use my RWMUTEX functions
