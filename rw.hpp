@@ -486,3 +486,69 @@ public:
 };
 
 
+class reverse_semaphore
+{
+private:
+	HANDLE hE = 0;
+	HANDLE hM = 0;
+	volatile unsigned long long m = 0;
+
+	reverse_semaphore(const reverse_semaphore&) = delete;
+	reverse_semaphore& operator =(const reverse_semaphore&) = delete;
+
+public:
+
+	reverse_semaphore()
+	{
+		m = 0;
+		hE = CreateEvent(0, TRUE, TRUE, 0);
+		hM = CreateMutex(0, 0, 0);
+	}
+
+	~reverse_semaphore()
+	{
+		CloseHandle(hM);
+		hM = 0;
+		CloseHandle(hE);
+		hE = 0;
+	}
+
+	void lock()
+	{
+		WaitForSingleObject(hM, INFINITE);
+		m++;
+		ResetEvent(hE);
+		ReleaseMutex(hM);
+	}
+
+	void unlock()
+	{
+		WaitForSingleObject(hM, INFINITE);
+		if (m > 0)
+			m--;
+		if (m == 0)
+			SetEvent(hE);
+		ReleaseMutex(hM);
+	}
+
+	DWORD Wait(DWORD dw = INFINITE)
+	{
+		return WaitForSingleObject(hE, dw);
+	}
+
+	void WaitAndLock()
+	{
+		HANDLE h[2] = { hE,hM };
+		WaitForMultipleObjects(2, h, TRUE, INFINITE);
+		lock();
+		ReleaseMutex(hM);
+	}
+	HANDLE WaitAndBlock()
+	{
+		HANDLE h[2] = { hE,hM };
+		WaitForMultipleObjects(2, h, TRUE, INFINITE);
+		return hM;
+	}
+
+
+};
