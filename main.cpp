@@ -23,7 +23,7 @@ HBRUSH hWB;
 HBRUSH hBB;
 
 int sq = 5;
-tlock<int> n(0);
+tlock<int,RWMUTEX> n(0);
 
 void thr(int idxd,bool fx)
 {
@@ -169,9 +169,31 @@ INT_PTR CALLBACK D_DP(HWND hh, UINT mm, WPARAM ww, LPARAM)
 	return 0;
 }
 
+void CollabTest();
+void USMTest();
+void FSnapTest();
+void DiffTest();
+
 int __stdcall WinMain(HINSTANCE h, HINSTANCE, LPSTR, int)
 {
 	srand((unsigned int)time(0));
+	WSADATA wData;
+	WSAStartup(MAKEWORD(2, 2), &wData);
+	CoInitializeEx(0, COINIT_MULTITHREADED);
+	INITCOMMONCONTROLSEX icex = { 0 };
+	icex.dwICC = ICC_LISTVIEW_CLASSES | ICC_DATE_CLASSES | ICC_WIN95_CLASSES;
+	icex.dwSize = sizeof(icex);
+	InitCommonControlsEx(&icex);
+	InitCommonControls();
+
+
+	// Uncomment to test these tools
+
+	// DiffTest();
+	// USMTest();
+	// FSnapTest();
+	// CollabTest();
+
 	DialogBox(h, L"DIALOG_1", 0, D_DP);
 }
 

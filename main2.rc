@@ -1,0 +1,23 @@
+MENU_2 MENU
+{
+	POPUP "File"
+	{
+		MENUITEM "New\tCtrl+N",101
+		MENUITEM "Open\tCtrl+O",102
+			MENUITEM "Save and create differential snapshop\tCtrl+T",105
+			MENUITEM "Save and create incremental snapshop\tCtrl+Shift+T",106
+			MENUITEM "Revert to ...\tCtrl+R",197
+			MENUITEM "Finalize\tCtrl+F",192
+}
+}
+
+MENU_2 ACCELERATORS
+{
+	"N",101,VIRTKEY,CONTROL
+	"O",102,VIRTKEY,CONTROL
+	"T",105,VIRTKEY,CONTROL
+	"T",106,VIRTKEY,CONTROL,SHIFT
+	"R",197,VIRTKEY,CONTROL
+	"F",192,VIRTKEY,CONTROL
+}
+

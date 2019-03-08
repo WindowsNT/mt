@@ -4,6 +4,9 @@
     <ClCompile Include="main.cpp">
       <Filter>Code</Filter>
     </ClCompile>
+    <ClCompile Include="main2.cpp">
+      <Filter>Code</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Code">
@@ -12,6 +15,9 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="main.rc">
+      <Filter>Code</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="main2.rc">
       <Filter>Code</Filter>
     </ResourceCompile>
   </ItemGroup>
