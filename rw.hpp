@@ -60,7 +60,7 @@ public:
 		return z;
 	}
 
-	vector<HANDLE> AllThreads;
+	std::vector<HANDLE> AllThreads;
 	void LockWrite(DWORD updThread = 0)
 	{
 		CreateIf(true);
