@@ -138,6 +138,11 @@ d.Reconstruct(r1,xdiff1,0,reco1);
 
 ```
 
+## ThreadPool API
+Article: https://www.codeproject.com/Articles/1012843/Win-Thread-Pools-and-Cplusplus-A-quick-wrapper
+
+
+
 ## Shared Memory
 Article: https://www.codeproject.com/Articles/835818/Ultimate-Shared-Memory-A-flexible-class-for-sharin
 
