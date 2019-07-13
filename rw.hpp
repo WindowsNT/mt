@@ -1,4 +1,7 @@
 // RWMUTEX 
+
+
+
 class RWMUTEX
 {
 private:
@@ -114,123 +117,6 @@ public:
 	}
 };
 
-/*
-// RWMUTEX2
-class RWMUTEX2
-{
-private:
-
-
-	RWMUTEX2(const RWMUTEX2&) = delete;
-	RWMUTEX2(RWMUTEX2&&) = delete;
-	SRWLOCK m;
-	thread_local static int st;
-
-public:
-
-	RWMUTEX2()
-	{
-		InitializeSRWLock(&m);
-	}
-
-	~RWMUTEX2()
-	{
-	}
-
-
-	bool LockRead(bool Try = false)
-	{
-		if (st != 0)
-			return true;
-		if (Try)
-		{
-			bool r = TryAcquireSRWLockShared(&m);
-			if (r)
-				st = 1;
-			return r;
-		}
-		AcquireSRWLockShared(&m);
-		st = 1;
-		return true;
-	}
-
-	bool LockWrite(bool Try = false)
-	{
-		if (st == 2)
-			return true;
-		if (st == 1)
-			ReleaseRead();
-		if (st != 0)
-			return false;
-
-		if (Try)
-		{
-			bool r = TryAcquireSRWLockExclusive(&m);
-			if (r)
-				st = 2;
-			return r;
-		}
-		AcquireSRWLockExclusive(&m);
-		st = 2;
-		return true;
-	}
-
-	bool ReleaseWrite()
-	{
-		if (st == 0)
-			return true;
-		if (st == 1)
-			return false; 
-		ReleaseSRWLockExclusive(&m);
-		st = 0;
-		return true;
-	}
-
-	bool ReleaseRead(HANDLE = nullptr)
-	{
-		if (st == 0)
-			return true;
-		if (st == 2)
-			return false;
-		ReleaseSRWLockShared(&m);
-		st = 0;
-		return true;
-
-	}
-
-	void Upgrade()
-	{
-		ReleaseRead();
-		LockWrite();
-	}
-
-	HANDLE Downgrade()
-	{
-		ReleaseWrite();
-		LockRead();
-		return nullptr;
-	}
-
-	int State()
-	{
-		return st;
-	}
-
-	void Revert(int ns)
-	{
-		if (ns == st)
-			return;
-
-		ReleaseWrite();
-		ReleaseRead();
-		if (ns == 2)
-			LockWrite();
-		if (ns == 1)
-			LockRead();
-	}
-};
-inline thread_local int RWMUTEX2::st = 0;
-*/
 class RWMUTEXLOCKREAD
 {
 private:
@@ -253,17 +139,6 @@ public:
 		}
 	}
 
-	/*
-	RWMUTEXLOCKREAD(RWMUTEX2*m)
-	{
-		if (m)
-		{
-			mm2 = m;
-			mm2st = m->State();
-			mm2->LockRead();
-		}
-	}
-	*/
 	~RWMUTEXLOCKREAD()
 	{
 		if (mm)
@@ -272,12 +147,6 @@ public:
 			lm = 0;
 			mm = 0;
 		}
-/*		if (mm2)
-		{
-			mm2->Revert(mm2st);
-			mm2 = 0;
-		}
-*/
 	}
 };
 
@@ -286,9 +155,6 @@ class RWMUTEXLOCKWRITE
 {
 private:
 	RWMUTEX* mm = 0;
-//	RWMUTEX2* mm2;
-	//int mm2st = 0;
-
 public:
 	RWMUTEXLOCKWRITE(RWMUTEX*m)
 	{
@@ -298,17 +164,6 @@ public:
 			mm->LockWrite();
 		}
 	}
-/*
-	RWMUTEXLOCKWRITE(RWMUTEX2*m)
-	{
-		if (m)
-		{
-			mm2 = m;
-			mm2st = m->State();
-			mm2->LockWrite();
-		}
-	}
-	*/
 
 	~RWMUTEXLOCKWRITE()
 	{
@@ -317,12 +172,6 @@ public:
 			mm->ReleaseWrite();
 			mm = 0;
 		}
-		/*if (mm2)
-		{
-			mm2->Revert(mm2st);
-			mm2 = 0;
-		}
-		*/
 	}
 };
 
@@ -378,6 +227,7 @@ public:
 		}
 	}
 };
+
 
 template <typename T,typename M = RWMUTEX> class tlock
 {
@@ -484,6 +334,84 @@ public:
 	const proxy operator -> () const { return r(); }
 
 };
+#include <shared_mutex>
+#include <functional>
+
+
+template <typename T> class tlock2
+{
+private:
+	mutable T t;
+	mutable std::shared_mutex m;
+
+	class proxy
+	{
+		T* const p;
+		std::shared_mutex* m;
+		int me;
+	public:
+		proxy(T* const _p, std::shared_mutex* _m, int _me) : p(_p), m(_m), me(_me)
+		{
+			if (me == 2)
+				m->lock();
+			else
+				m->lock_shared();
+		}
+		~proxy()
+		{
+			if (me == 2)
+				m->unlock();
+			else
+				m->unlock_shared();
+		}
+		T* operator -> () { return p; }
+		const T* operator -> () const { return p; }
+		T* getp() { return p; }
+		const T* getpc() const { return p; }
+
+	};
+
+public:
+	template< typename ...Args>
+	tlock2(Args ... args) : t(args...) {}
+	const proxy r() const
+	{
+		return proxy(&t, &m, 1);
+	}
+	proxy w()
+	{
+		return proxy(&t, &m, 2);
+	}
+
+	std::shared_mutex& mut() { return m; }
+	T& direct()
+	{
+		return t;
+	}
+
+	const T& direct() const
+	{
+		return t;
+	}
+
+
+	void readlock(::std::function<void(const T&)> f) const
+	{
+		proxy mx(&t, &m, 1);
+		f(*mx.getp());
+	}
+	void writelock(::std::function<void(T&)> f)
+	{
+		proxy mx(&t, &m, 2);
+		f(*mx.getp());
+	}
+
+
+	proxy operator -> () { return w(); }
+	const proxy operator -> () const { return r(); }
+
+};
+
 
 
 class reverse_semaphore

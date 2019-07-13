@@ -23,7 +23,7 @@ HBRUSH hWB;
 HBRUSH hBB;
 
 int sq = 5;
-tlock<int,RWMUTEX> n(0);
+tlock<int> n(0);
 
 void thr(int idxd,bool fx)
 {
@@ -173,9 +173,12 @@ void CollabTest();
 void USMTest();
 void FSnapTest();
 void DiffTest();
+void PoolTest();
 
 int __stdcall WinMain(HINSTANCE h, HINSTANCE, LPSTR, int)
 {
+	//PoolTest();
+
 	srand((unsigned int)time(0));
 	WSADATA wData;
 	WSAStartup(MAKEWORD(2, 2), &wData);
@@ -193,7 +196,7 @@ int __stdcall WinMain(HINSTANCE h, HINSTANCE, LPSTR, int)
 	// USMTest();
 	// FSnapTest();
 	// CollabTest();
-
+	// PoolTest();
 	DialogBox(h, L"DIALOG_1", 0, D_DP);
 }
 

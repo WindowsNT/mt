@@ -1,6 +1,6 @@
 #include "diff.hpp"
 
-
+#include <functional>
 
 namespace COLLAB
 	{
@@ -220,7 +220,7 @@ namespace COLLAB
 				}
 
 			
-			int transmit(const char *b, int sz, bool ForceAll = false, int p = 0, std::function<void(int)> cb = nullptr)
+			int transmit(const char *b, int sz, bool ForceAll = false, int p = 0, ::std::function<void(int)> cb = nullptr)
 				{
 				// same as send, but forces reading ALL sz
 				if (!ForceAll)
@@ -813,7 +813,7 @@ namespace COLLAB
 					auto e = lix.Accept();
 					if (e == SOCKET_ERROR)
 						break;
-					std::thread t(&SERVER::client, this,e);
+					::std::thread t(&SERVER::client, this,e);
 					t.detach();
 					}
 				}
@@ -850,7 +850,7 @@ namespace COLLAB
 				lix.Create();
 				if (!lix.BindAndListen(port))
 					return E_FAIL;
-				std::thread t(&SERVER::acc, this);
+				::std::thread t(&SERVER::acc, this);
 				t.detach();
 				return S_OK;
 				}
@@ -981,7 +981,7 @@ namespace COLLAB
 						break; // ok
 						}
 					}
-				std::thread t(&CLIENT::ReceiveServerCommands, this);
+				::std::thread t(&CLIENT::ReceiveServerCommands, this);
 				t.detach();
 				return S_OK;
 				}

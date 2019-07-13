@@ -684,3 +684,21 @@ void CollabTest()
 	CollabTestLoop();
 }
 
+
+#include "pool.h"
+void PoolTest()
+{
+	TPOOL p;
+	p.Init(4);
+	Sleep(5000);
+	p.Add([]() { MessageBox(0, L"1", 0, 0); });
+	p.Join();
+	p.Add([]() { MessageBox(0, L"2", 0, 0); });
+	p.Join();
+	p.Add([]() { MessageBox(0, L"3", 0, 0); });
+	p.Join();
+	p.Add([]() { MessageBox(0, L"4", 0, 0); });
+	p.Join();
+	//	p.Add([]() { MessageBox(0, L"5", 0, 0); });
+	p.Join();
+}
