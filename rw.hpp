@@ -26,13 +26,18 @@ public:
 			hChangeMap = OpenMutex(SYNCHRONIZE, false, mutname);
 	}
 
+	void ClearThreads()
+	{
+		for (auto& a : Threads)
+			CloseHandle(a.second);
+		Threads.clear();
+	}
+
 	~RWMUTEX()
 	{
 		CloseHandle(hChangeMap);
 		hChangeMap = 0;
-		for (auto& a : Threads)
-			CloseHandle(a.second);
-		Threads.clear();
+		ClearThreads();
 	}
 
 	HANDLE CreateIf(bool KeepReaderLocked = false, const wchar_t* mutname = 0)
