@@ -511,6 +511,8 @@ public:
 	// Write
 	shared_ptr<T> operator ->()
 	{
+		if (t.use_count() == 1)
+			return t;
 		::std::shared_ptr<T> t2 = ::std::make_shared<T>(*t);
 		t = t2;
 		return t;
