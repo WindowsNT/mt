@@ -120,9 +120,9 @@ A copy on write class that automatically duplicates an object when writing.
 
 	// Write
 	c->a2 = 2; // 1 copy 
-	c->a1 = 4; // 2 copies, but the previous vanishes (only 1 ref)
+	c->a1 = 4; // No copy, because only one reference count optimization. 
 
-	c2.write([](std::shared_ptr<FOO> t) // 3rd copy, now there are 3 smart pointers with count 1
+	c2.write([](std::shared_ptr<FOO> t) // Aopy, now there are 3 smart pointers with count 1
 		{
 			t->a1 = 10;
 			t->a2 = 20;
