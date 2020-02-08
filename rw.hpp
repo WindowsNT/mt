@@ -495,7 +495,7 @@ private:
 public:
 
 	template< typename ...Args>
-	cow(Args ... args) : ::std::make_shared<T>(args...) {}
+	cow(Args ... args) : { t = ::std::make_shared<T>(args...);  }
 
 	cow(::std::shared_ptr<T> t2)
 	{
