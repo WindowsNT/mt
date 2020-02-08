@@ -485,3 +485,41 @@ public:
 
 
 };
+
+
+template <typename T> class cow
+{
+private:
+	mutable ::std::shared_ptr<T> t;
+
+public:
+
+	template< typename ...Args>
+	cow(Args ... args) : ::std::make_shared<T>(args...) {}
+
+	cow(::std::shared_ptr<T> t2)
+	{
+		t = t2;
+	}
+
+	operator const ::std::shared_ptr<T>() const { return t; }
+	const T operator *()
+	{
+		return *t;
+	}
+
+	// Write
+	shared_ptr<T> operator ->()
+	{
+		::std::shared_ptr<T> t2 = ::std::make_shared<T>(*t);
+		t = t2;
+		return t;
+	}
+
+	void write(::std::function<void(::std::shared_ptr<T>)> f)
+	{
+		f(operator ->());
+	}
+
+};
+

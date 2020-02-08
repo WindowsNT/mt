@@ -1,5 +1,6 @@
 # Multithreading Tools for Windows
 
+
 # tlock
 A C++ library for Windows for efficient read/write locks with template generalization.
 
@@ -101,7 +102,34 @@ void foo3()
 
 ```
 
+# cow
+A copy on write class that automatically duplicates an object when writing.
 
+```C++
+    struct FOO
+    {
+	    int a1 = 0;
+	    int a2 = 0;
+    };
+
+	std::shared_ptr<FOO> x = std::make_shared<FOO>();
+	// read only
+	cow<FOO> c(x);
+	const FOO& j1 = *c;
+	cow<FOO> c2 = c;
+
+	// Write
+	c->a2 = 2; // 1 copy 
+	c->a1 = 4; // 2 copies, but the previous vanishes (only 1 ref)
+
+	c2.write([](std::shared_ptr<FOO> t) // 3rd copy, now there are 3 smart pointers with count 1
+		{
+			t->a1 = 10;
+			t->a2 = 20;
+		});
+
+
+```
 # Collaboration Tools
 Welcome to my collaboration tools for Windows.
 
